@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, Typography, Button, Grid } from "@mui/material";
 import Navbar from "./Navbar";
-import { RemoveShoppingCartRounded, Add, Remove } from "@mui/icons-material";
+import {
+  RemoveShoppingCartRounded,
+  Add,
+  Remove,
+  Favorite,
+} from "@mui/icons-material";
 
 const Cart = () => {
   const [cart, setCart] = useState<any[]>([]);
@@ -41,6 +46,22 @@ const Cart = () => {
     const updatedCart = cart.filter((item: { id: any }) => item.id !== id);
     setCart(updatedCart);
     localStorage.setItem("cart", JSON.stringify(updatedCart));
+  };
+
+  const handleMoveToWishlist = (product: any) => {
+    const wishlist = JSON.parse(localStorage.getItem("wishlist") || "[]");
+
+    // Add the product to the wishlist if not already present
+    const existingProduct = wishlist.find(
+      (item: { id: any }) => item.id === product.id
+    );
+    if (!existingProduct) {
+      wishlist.push(product);
+      localStorage.setItem("wishlist", JSON.stringify(wishlist));
+    }
+
+    // Remove the product from the cart
+    handleRemove(product.id);
   };
 
   // Calculate total cart value
@@ -106,11 +127,18 @@ const Cart = () => {
                     </Button>
                     &nbsp;
                     <Button
-                      variant="contained"
+                      variant="outlined"
                       color="error"
                       onClick={() => handleRemove(item.id)}
                     >
                       <RemoveShoppingCartRounded />
+                    </Button>
+                    &nbsp;
+                    <Button
+                      variant="outlined"
+                      onClick={() => handleMoveToWishlist(item)}
+                    >
+                      <Favorite />
                     </Button>
                   </div>
                 </CardContent>

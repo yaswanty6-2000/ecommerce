@@ -42,7 +42,8 @@ const Wishlist = () => {
     return (
       <>
         <Navbar />
-        <Typography variant="h6" style={{ marginTop: "50px" }}>
+        <Typography variant="h4" style={{ marginTop: "50px" }}>Wishlist</Typography>
+        <Typography variant="h6">
           Your wishlist is empty.
         </Typography>
       </>
