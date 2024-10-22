@@ -6,9 +6,9 @@ const router = express.Router();
 // Get the cart
 router.get('/', async (req, res) => {
     try {
-        const cart = await Cart.findOne().populate('products.productId'); // Populate product details
+        const cart = await Cart.findOne().populate('products.productId');
         if (!cart) {
-            return res.status(404).json({ message: 'Cart not found' });
+            return res.json({ products: [] });
         }
 
         res.status(200).json(cart);
@@ -63,9 +63,7 @@ router.post('/add', async (req, res) => {
 router.delete('/remove/:productId', async (req, res) => {
     try {
         const { productId } = req.params;
-
         const cart = await Cart.findOne();
-
         if (cart) {
             cart.products = cart.products.filter(item => item.productId.toString() !== productId);
             await cart.save();

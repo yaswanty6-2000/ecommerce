@@ -6,9 +6,9 @@ const Wishlist = require('../models/Wishlist');
 // Fetch wishlist items
 router.get('/', async (req, res) => {
     try {
-        const wishlist = await Wishlist.findOne({}).populate('products');
+        const wishlist = await Wishlist.findOne().populate('products');
         if (!wishlist || wishlist.products.length === 0) {
-            return res.json({ message: 'Wishlist is empty' });
+            return res.json({ products: [] });
         }
         res.json({ products: wishlist.products });
     } catch (error) {

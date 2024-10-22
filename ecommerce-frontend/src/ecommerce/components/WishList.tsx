@@ -7,18 +7,22 @@ import { Product } from "../types";
 
 const Wishlist = () => {
   const [wishlist, setWishlist] = useState<any>([]);
-  const { fetchWishlistItems, removeWishlistItem } = useHttpClient();
+  const { fetchWishlistItems, removeWishlistItem, addCartItem } = useHttpClient();
 
-  const { addCartItem } = useHttpClient();
-
-  useEffect(() => {
+  // Function to refetch wishlist items and update state
+  const loadWishlist = () => {
     fetchWishlistItems()
       .then(res => {
         setWishlist(res.data?.products);
       })
       .catch(err => {
-        console.log("Error", err)
-      })
+        console.log("Error", err);
+      });
+  };
+
+  // Fetch wishlist items when the component mounts
+  useEffect(() => {
+    loadWishlist();
   }, []);
 
   const handleAddToCart = (product: Product) => {
@@ -26,25 +30,28 @@ const Wishlist = () => {
       productId: product._id,
       quantity: 1
     })
-      .then(res => {
-        handleRemoveFromWishlist(product._id);
+      .then(() => {
+        handleRemoveFromWishlist(product._id); // Remove from wishlist after adding to cart
+        loadWishlist(); // Refetch wishlist to update the UI
         alert("Moved to cart");
       })
       .catch(err => {
         console.log("Error", err);
-      })
+      });
   };
 
   const handleRemoveFromWishlist = (id: any) => {
-    removeWishlistItem(id).then(res => {
-      alert('Deleted wishlist');
-    })
+    removeWishlistItem(id)
+      .then(() => {
+        loadWishlist(); // Refetch wishlist after removing item
+        alert('Deleted from wishlist');
+      })
       .catch(err => {
         console.log("Error", err);
-      })
+      });
   };
 
-  if (wishlist.length === 0) {
+  if (wishlist?.length === 0) {
     return (
       <>
         <Navbar />
@@ -64,7 +71,7 @@ const Wishlist = () => {
           Wishlist
         </Typography>
         <Grid container spacing={2}>
-          {wishlist.map((product: any) => (
+          {wishlist?.map((product: any) => (
             <Grid item xs={12} sm={6} md={4} key={product.id}>
               <Card
                 style={{

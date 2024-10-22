@@ -7,17 +7,22 @@ import { Add, Remove, RemoveShoppingCartRounded, Favorite } from "@mui/icons-mat
 const Cart = () => {
   const [cart, setCart] = useState<any>([]);
 
-  const { fetchCartItems, addCartItem, removeCartItem,
-    getCartItemById, addWishlistItem } = useHttpClient();
+  const { fetchCartItems, addCartItem, removeCartItem, getCartItemById, addWishlistItem } = useHttpClient();
 
-  useEffect(() => {
+  // Function to refetch the cart and update state
+  const loadCart = () => {
     fetchCartItems()
       .then(res => {
         setCart(res.data);
       })
       .catch(err => {
         console.log("Error", err);
-      })
+      });
+  };
+
+  // Fetch cart items when the component mounts
+  useEffect(() => {
+    loadCart();
   }, []);
 
   const handleIncrement = (id: string) => {
@@ -25,12 +30,12 @@ const Cart = () => {
       productId: id,
       quantity: 1
     })
-      .then(res => {
-        alert("Moved to cart");
+      .then(() => {
+        loadCart(); // Refetch cart after incrementing quantity
       })
       .catch(err => {
         console.log("Error", err);
-      })
+      });
   };
 
   const handleDecrement = (id: string) => {
@@ -38,61 +43,44 @@ const Cart = () => {
       productId: id,
       quantity: -1
     })
-      .then(res => {
-        alert("Moved to cart");
+      .then(() => {
+        loadCart(); // Refetch cart after decrementing quantity
       })
       .catch(err => {
         console.log("Error", err);
-      })
+      });
   };
 
   const handleRemove = (id: any) => {
     removeCartItem(id)
-      .then(res => {
-        alert('Removed from cart');
+      .then(() => {
+        loadCart(); // Refetch cart after removing the item
       })
       .catch(err => {
         console.log("Error", err);
-      })
+      });
   };
 
-  // check for item in cart
-  const isItemInCart = (id: string) => {
-    getCartItemById(id)
-      .then(res => {
-        return res.data;
-      })
-      .catch(err => {
-        console.log("Error", err);
-      })
-    return false;
-  }
-
   const handleMoveToWishlist = (product: any) => {
-
-    // Add the product to the wishlist if not already present
-    // const existingProduct = isItemInCart(product?.productId?._id);
-    // if (!existingProduct) {
     addWishlistItem({
       productId: product?.productId?._id
     })
-      .then(res => {
+      .then(() => {
+        // handleRemove(product?.productId?._id);
         alert('Moved to wishlist from cart');
       })
       .catch(err => {
         console.log("Error", err);
-      })
-    // }
-
-    // Remove the product from the cart
-    // handleRemove(product.id);
+      });
   };
 
   // Calculate total cart value
-  // const totalCartValue = cart.products.reduce(
-  //   (total: number, item: any) => total + item.productId.price * item.quantity,
-  //   0
-  // );
+  const totalCartValue = () => {
+    return cart.products?.reduce(
+      (total: number, item: any) => total + (item.productId.price * item.quantity),
+      0
+    );
+  };
 
   return (
     <div style={{ padding: "20px" }}>
@@ -101,10 +89,10 @@ const Cart = () => {
         Shopping Cart
       </Typography>
       <Grid container spacing={2}>
-        {cart.length === 0 ? (
+        {cart.products?.length === 0 ? (
           <Typography variant="h6">Your cart is empty.</Typography>
         ) : (
-            cart?.products.map((item: any) => (
+            cart.products?.map((item: any) => (
               <Grid item xs={12} sm={6} md={4} key={item?.productId?._id}>
               <Card
                 style={{
@@ -172,11 +160,10 @@ const Cart = () => {
         )}
       </Grid>
 
-      {cart.length > 0 && (
+      {cart?.products?.length > 0 && (
         <div style={{ marginTop: "20px", textAlign: "left" }}>
           <Typography variant="h5">
-            {/* Total: ${totalCartValue.toFixed(2)} */}
-            Cart value
+            Total Cart Value: ${totalCartValue().toFixed(2)}
           </Typography>
         </div>
       )}
