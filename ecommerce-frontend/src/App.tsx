@@ -1,6 +1,5 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Home from "./ecommerce/components/Navbar";
 import Products from "./ecommerce/components/Products";
 import ProductDetail from "./ecommerce/components/ProductDetail";
 import WishList from "./ecommerce/components/WishList";
@@ -10,7 +9,7 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<Products />} />
         <Route path="products" element={<Products />} />
         <Route path="products/:id" element={<ProductDetail />} />
         <Route path="wishList" element={<WishList />} />

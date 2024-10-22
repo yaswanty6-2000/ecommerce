@@ -1,51 +1,75 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { productsData } from "../store/data";
 import { Card, CardContent, Typography, Button, Snackbar } from "@mui/material";
 import { AddShoppingCart, Favorite } from "@mui/icons-material";
 import Navbar from "./Navbar";
+import { useHttpClient } from "../hooks/useHttpClient";
+import { Product } from "../types";
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const product = productsData.find((p) => p.id === parseInt(id!));
+  const [productsData, setProductsData] = useState<Product[]>([]);
+  const product = productsData.find((p: Product) => p._id === id);
 
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [openToast, setOpenToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
 
+  const { fetchProducts, getCartItemById,
+    addCartItem, addWishlistItem, checkWishlistItem
+  } = useHttpClient();
+
+  useEffect(() => {
+    fetchProducts().then(res => {
+      setProductsData(res.data);
+    })
+      .catch(err => {
+        console.log("Error", err)
+      })
+  }, [])
+
+  // check for item in wishlist
+  const isItemInWishlist = () => {
+    checkWishlistItem(id)
+      .then(res => {
+        return res.data;
+      })
+      .catch(err => {
+        console.log("Error", err);
+      })
+    return false;
+  }
+
+
   const handleAddToCart = () => {
-    const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-
-    // Check if product already exists in the cart
-    const existingProduct = cart.find((item: any) => item.id === product?.id);
-    if (existingProduct) {
-      // Increment quantity if already in cart
-      existingProduct.quantity += 1;
-    } else {
-      // Add new product to cart
-      cart.push({ ...product, quantity: 1 });
-    }
-
-    localStorage.setItem("cart", JSON.stringify(cart));
-    setToastMessage("Added to Cart!");
-    setOpenToast(true);
+    addCartItem({
+      productId: id,
+      quantity: 1
+    })
+      .then(res => {
+        setToastMessage("Added to Cart!");
+        setOpenToast(true);
+      })
+      .catch(err => {
+        console.log("Error", err);
+      })
   };
 
   const handleAddToWishlist = () => {
-    const wishlist = JSON.parse(localStorage.getItem("wishlist") || "[]");
-
     // Check if product already exists in the wishlist
-    const existingProduct = wishlist.find(
-      (item: any) => item.id === product?.id
-    );
-    if (!existingProduct) {
-      wishlist.push(product); // Add new product to wishlist
-      localStorage.setItem("wishlist", JSON.stringify(wishlist));
-      setToastMessage("Added to Wishlist!");
+    const inWishList = isItemInWishlist();
+    if (!inWishList) {
+      addWishlistItem({
+        productId: id
+      }).then(res => {
+        setToastMessage("Added to Wishlist!");
+      })
+        .catch(err => {
+          console.log('Error', err);
+        })
     } else {
       setToastMessage("Already in Wishlist!");
     }
-
     setOpenToast(true);
   };
 
@@ -69,12 +93,12 @@ const ProductDetail = () => {
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
-          height: "100vh", // Vertically center
+          height: "100vh",
         }}
       >
         <Card style={{ maxWidth: "500px", width: "100%" }}>
           <img
-            src={product.image}
+            src={product.imageUrl}
             alt={product.name}
             style={{ height: "300px", width: "100%" }}
           />
@@ -150,7 +174,7 @@ const ProductDetail = () => {
         open={openToast}
         onClose={handleToastClose}
         message={toastMessage}
-        autoHideDuration={3000} // Automatically hide after 3 seconds
+        autoHideDuration={3000}
       />
     </>
   );

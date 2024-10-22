@@ -21,30 +21,38 @@ router.get('/', async (req, res) => {
 router.post('/add', async (req, res) => {
     try {
         const { productId, quantity } = req.body;
-
         const cart = await Cart.findOne();
-
         if (cart) {
-            // Check if the product already exists in the cart
             const existingProduct = cart.products.find(item => item.productId.toString() === productId);
 
             if (existingProduct) {
-                // Increment quantity
                 existingProduct.quantity += quantity;
+                // If the updated quantity is 0 or less, remove the product from the cart
+                if (existingProduct.quantity <= 0) {
+                    cart.products = cart.products.filter(item => item.productId.toString() !== productId);
+                }
             } else {
-                // Add new product to cart
-                cart.products.push({ productId, quantity });
+                // Add new product to cart only if quantity is greater than 0
+                if (quantity > 0) {
+                    cart.products.push({ productId, quantity });
+                } else {
+                    return res.status(400).json({ message: 'Quantity must be greater than 0 to add a new product' });
+                }
             }
 
             await cart.save();
             res.status(200).json(cart);
         } else {
-            // Create a new cart if it doesn't exist
-            const newCart = new Cart({
-                products: [{ productId, quantity }]
-            });
-            await newCart.save();
-            res.status(201).json(newCart);
+            // Create a new cart only if the quantity is greater than 0
+            if (quantity > 0) {
+                const newCart = new Cart({
+                    products: [{ productId, quantity }]
+                });
+                await newCart.save();
+                res.status(201).json(newCart);
+            } else {
+                return res.status(400).json({ message: 'Quantity must be greater than 0 to create a cart' });
+            }
         }
     } catch (error) {
         res.status(500).json({ message: 'Error adding product to cart', error });
@@ -67,6 +75,22 @@ router.delete('/remove/:productId', async (req, res) => {
         }
     } catch (error) {
         res.status(500).json({ message: 'Error removing product from cart', error });
+    }
+});
+
+// Get cart by ID
+router.get('/:id', async (req, res) => {
+    try {
+        const id = req.params.id;
+        // if (!id)
+        //     res.status(400).json({ message: `Id ${id || undefined} not found`, error });
+        const cart = await Cart.findById(id).populate('products.productId');
+        if (!cart) {
+            return res.status(404).json({ message: 'Cart not found' });
+        }
+        res.status(200).json(cart);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching cart', error });
     }
 });
 

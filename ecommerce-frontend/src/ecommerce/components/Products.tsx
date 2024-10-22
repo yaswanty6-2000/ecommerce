@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   TextField,
   Card,
@@ -8,17 +8,31 @@ import {
   Grid,
   Box,
 } from "@mui/material";
-import { productsData } from "../store/data";
 import { useNavigate } from "react-router-dom";
 import Navbar from "./Navbar";
+import { useHttpClient } from "../hooks/useHttpClient";
+import { Product } from "../types";
 
 const Products = () => {
   const [searchText, setSearchText] = useState("");
   const [priceRange, setPriceRange] = useState([0, 1500]);
+  const [productsData, setProductsData] = useState<Product[]>([]);
 
   const navigate = useNavigate();
+  const { fetchProducts } = useHttpClient();
 
-  const filteredProducts = productsData.filter((product) => {
+
+  useEffect(() => {
+    fetchProducts().then(res => {
+      setProductsData(res.data);
+    })
+      .catch(err => {
+        console.log("Error", err)
+      })
+  }, [])
+
+
+  const filteredProducts = productsData.filter((product: Product) => {
     return (
       product.name.toLowerCase().includes(searchText.toLowerCase()) &&
       product.price >= priceRange[0] &&
@@ -26,7 +40,7 @@ const Products = () => {
     );
   });
 
-  const handleProductClick = (id: number) => {
+  const handleProductClick = (id: string) => {
     navigate(`/products/${id}`);
   };
 
@@ -78,10 +92,10 @@ const Products = () => {
         <Grid container spacing={2}>
           {" "}
           {/* Adjusted spacing for cards */}
-          {filteredProducts.map((product) => (
-            <Grid item xs={12} sm={6} md={4} lg={3} key={product.id}>
+          {filteredProducts.map((product: Product) => (
+            <Grid item xs={12} sm={6} md={4} lg={3} key={product._id}>
               <Card
-                onClick={() => handleProductClick(product.id)}
+                onClick={() => handleProductClick(product._id)}
                 style={{
                   cursor: "pointer",
                   height: "350px",
@@ -90,7 +104,7 @@ const Products = () => {
                 }}
               >
                 <img
-                  src={product.image}
+                  src={product.imageUrl}
                   alt={product.name}
                   style={{ height: "150px", width: "100%", objectFit: "cover" }}
                 />
