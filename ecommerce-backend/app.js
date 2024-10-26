@@ -8,7 +8,6 @@ const cors = require('cors');
 const productRoutes = require('./routes/productRoutes');
 const wishlistRoutes = require('./routes/wishlistRoutes');
 const cartRoutes = require('./routes/cartRoutes');
-const cloudRoutes = require('./routes/cloudRoutes');
 const indexRouter = require('./routes/index');
 
 const app = express();
@@ -39,7 +38,6 @@ app.use('/', indexRouter);
 app.use('/api/products', productRoutes);
 app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/cart', cartRoutes);
-app.use(cloudRoutes);
 
 // Define a catch-all route to serve the React app for any other request
 app.get("*", (req, res) => {
