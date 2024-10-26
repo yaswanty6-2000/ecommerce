@@ -8,7 +8,6 @@ const cors = require('cors');
 const productRoutes = require('./routes/productRoutes');
 const wishlistRoutes = require('./routes/wishlistRoutes');
 const cartRoutes = require('./routes/cartRoutes');
-const indexRouter = require('./routes/index');
 
 const app = express();
 app.use(cors());
@@ -34,7 +33,6 @@ app.use(express.static(path.join(__dirname, 'public', 'build'), {
 }));
 
 // Define your API routes before the catch-all route
-app.use('/', indexRouter);
 app.use('/api/products', productRoutes);
 app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/cart', cartRoutes);
