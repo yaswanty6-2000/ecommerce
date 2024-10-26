@@ -7,9 +7,8 @@ import { Add, Remove, RemoveShoppingCartRounded, Favorite } from "@mui/icons-mat
 const Cart = () => {
   const [cart, setCart] = useState<any>([]);
 
-  const { fetchCartItems, addCartItem, removeCartItem, getCartItemById, addWishlistItem } = useHttpClient();
+  const { fetchCartItems, addCartItem, removeCartItem, addWishlistItem } = useHttpClient();
 
-  // Function to refetch the cart and update state
   const loadCart = () => {
     fetchCartItems()
       .then(res => {
@@ -20,7 +19,6 @@ const Cart = () => {
       });
   };
 
-  // Fetch cart items when the component mounts
   useEffect(() => {
     loadCart();
   }, []);
@@ -31,7 +29,7 @@ const Cart = () => {
       quantity: 1
     })
       .then(() => {
-        loadCart(); // Refetch cart after incrementing quantity
+        loadCart();
       })
       .catch(err => {
         console.log("Error", err);
@@ -44,7 +42,7 @@ const Cart = () => {
       quantity: -1
     })
       .then(() => {
-        loadCart(); // Refetch cart after decrementing quantity
+        loadCart(); 
       })
       .catch(err => {
         console.log("Error", err);
@@ -54,7 +52,7 @@ const Cart = () => {
   const handleRemove = (id: any) => {
     removeCartItem(id)
       .then(() => {
-        loadCart(); // Refetch cart after removing the item
+        loadCart();
       })
       .catch(err => {
         console.log("Error", err);
@@ -74,7 +72,6 @@ const Cart = () => {
       });
   };
 
-  // Calculate total cart value
   const totalCartValue = () => {
     return cart.products?.reduce(
       (total: number, item: any) => total + (item.productId.price * item.quantity),

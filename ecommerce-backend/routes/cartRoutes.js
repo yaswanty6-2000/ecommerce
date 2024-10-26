@@ -6,11 +6,11 @@ const router = express.Router();
 // Get the cart
 router.get('/', async (req, res) => {
     try {
+        // populate the products data
         const cart = await Cart.findOne().populate('products.productId');
         if (!cart) {
             return res.json({ products: [] });
         }
-
         res.status(200).json(cart);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching cart', error });
@@ -27,12 +27,10 @@ router.post('/add', async (req, res) => {
 
             if (existingProduct) {
                 existingProduct.quantity += quantity;
-                // If the updated quantity is 0 or less, remove the product from the cart
                 if (existingProduct.quantity <= 0) {
                     cart.products = cart.products.filter(item => item.productId.toString() !== productId);
                 }
             } else {
-                // Add new product to cart only if quantity is greater than 0
                 if (quantity > 0) {
                     cart.products.push({ productId, quantity });
                 } else {
@@ -43,7 +41,6 @@ router.post('/add', async (req, res) => {
             await cart.save();
             res.status(200).json(cart);
         } else {
-            // Create a new cart only if the quantity is greater than 0
             if (quantity > 0) {
                 const newCart = new Cart({
                     products: [{ productId, quantity }]
@@ -80,8 +77,6 @@ router.delete('/remove/:productId', async (req, res) => {
 router.get('/:id', async (req, res) => {
     try {
         const id = req.params.id;
-        // if (!id)
-        //     res.status(400).json({ message: `Id ${id || undefined} not found`, error });
         const cart = await Cart.findById(id).populate('products.productId');
         if (!cart) {
             return res.status(404).json({ message: 'Cart not found' });

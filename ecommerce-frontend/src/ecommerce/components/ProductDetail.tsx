@@ -15,7 +15,7 @@ const ProductDetail = () => {
   const [openToast, setOpenToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
 
-  const { fetchProducts, getCartItemById,
+  const { fetchProducts,
     addCartItem, addWishlistItem, checkWishlistItem
   } = useHttpClient();
 

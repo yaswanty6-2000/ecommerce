@@ -1,5 +1,4 @@
 import httpClient from "../httpClient"
-import { Cart } from "../types"
 import { BASE_URLS } from "../utils"
 
 export const useHttpClient = () => {

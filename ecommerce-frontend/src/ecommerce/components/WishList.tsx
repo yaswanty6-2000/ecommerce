@@ -9,7 +9,6 @@ const Wishlist = () => {
   const [wishlist, setWishlist] = useState<any>([]);
   const { fetchWishlistItems, removeWishlistItem, addCartItem } = useHttpClient();
 
-  // Function to refetch wishlist items and update state
   const loadWishlist = () => {
     fetchWishlistItems()
       .then(res => {
@@ -20,7 +19,6 @@ const Wishlist = () => {
       });
   };
 
-  // Fetch wishlist items when the component mounts
   useEffect(() => {
     loadWishlist();
   }, []);
@@ -31,8 +29,8 @@ const Wishlist = () => {
       quantity: 1
     })
       .then(() => {
-        handleRemoveFromWishlist(product._id); // Remove from wishlist after adding to cart
-        loadWishlist(); // Refetch wishlist to update the UI
+        handleRemoveFromWishlist(product._id);
+        loadWishlist();
         alert("Moved to cart");
       })
       .catch(err => {
@@ -43,7 +41,7 @@ const Wishlist = () => {
   const handleRemoveFromWishlist = (id: any) => {
     removeWishlistItem(id)
       .then(() => {
-        loadWishlist(); // Refetch wishlist after removing item
+        loadWishlist();
         alert('Deleted from wishlist');
       })
       .catch(err => {

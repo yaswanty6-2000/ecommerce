@@ -23,16 +23,19 @@ const Products = () => {
 
 
   useEffect(() => {
-    fetchProducts().then(res => {
-      setProductsData(res.data);
-    })
-      .catch(err => {
-        console.log("Error", err)
+    fetchProducts()
+      .then(res => {
+        const data = Array.isArray(res.data) ? res.data : [];
+        setProductsData(data);
       })
-  }, [])
+      .catch(err => {
+        console.log("Error", err);
+      });
+  }, []);
+  
 
 
-  const filteredProducts = productsData.filter((product: Product) => {
+  const filteredProducts = productsData?.filter((product: Product) => {
     return (
       product.name.toLowerCase().includes(searchText.toLowerCase()) &&
       product.price >= priceRange[0] &&
@@ -91,8 +94,7 @@ const Products = () => {
 
         <Grid container spacing={2}>
           {" "}
-          {/* Adjusted spacing for cards */}
-          {filteredProducts.map((product: Product) => (
+          {Array.isArray(filteredProducts)? filteredProducts.map((product: Product) => (
             <Grid item xs={12} sm={6} md={4} lg={3} key={product._id}>
               <Card
                 onClick={() => handleProductClick(product._id)}
@@ -120,7 +122,7 @@ const Products = () => {
                       whiteSpace: "nowrap",
                       textOverflow: "ellipsis",
                     }}
-                    title={product.description} // Tooltip to show full description on hover
+                    title={product.description}
                   >
                     {product.description}
                   </Typography>
@@ -130,7 +132,7 @@ const Products = () => {
                 </CardContent>
               </Card>
             </Grid>
-          ))}
+          )):<></>}
         </Grid>
       </div>
     </>
