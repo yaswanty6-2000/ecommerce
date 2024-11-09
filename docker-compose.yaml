@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: ecommerce-frontend/Dockerfile
+    ports:
+      - "80:80"  # HTTP port for local testing
+      - "443:443" # HTTPS Port
+    depends_on:
+      - backend
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+
+  backend:
+    build:
+      context: .
+      dockerfile: ecommerce-backend/Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/ecommerce
+    depends_on:
+      - mongo
+
+  mongo:
+    image: mongo:latest
+    volumes:
+      - mongo_data:/data/db
+    expose:
+      - "27017"
+
+volumes:
+  mongo_data:
+  caddy_data:
+  caddy_config:

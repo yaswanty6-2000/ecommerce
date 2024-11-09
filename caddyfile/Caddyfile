@@ -1,0 +1,13 @@
+# Redirect HTTP to HTTPS
+http://<EC2_PUBLIC_IP> {
+    redir https://<EC2_PUBLIC_IP>{uri} permanent
+}
+
+# Serve over HTTPS with self-signed certificate
+https://<EC2_PUBLIC_IP> {
+    root * /app/ecommerce-backend/public
+    file_server
+    encode gzip
+    
+    tls /path/to/your/certificate.crt /path/to/your/private.key
+}
