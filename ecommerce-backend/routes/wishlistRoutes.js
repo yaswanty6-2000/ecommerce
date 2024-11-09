@@ -1,12 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const Wishlist = require('../models/Wishlist');
+const { authMiddleware } = require('../middleware/authMiddleware'); // Import the token verification middleware
 
-
-// Fetch wishlist items
-router.get('/', async (req, res) => {
+// Fetch wishlist items for the authenticated user
+router.get('/', authMiddleware, async (req, res) => {
+    const userId = req.user.id; // Get the user ID from the token
     try {
-        const wishlist = await Wishlist.findOne().populate('products');
+        const wishlist = await Wishlist.findOne({ userId }).populate('products');
         if (!wishlist || wishlist.products.length === 0) {
             return res.json({ products: [] });
         }
@@ -16,14 +17,15 @@ router.get('/', async (req, res) => {
     }
 });
 
-// Add product to wishlist
-router.post('/add', async (req, res) => {
+// Add product to wishlist for the authenticated user
+router.post('/add', authMiddleware, async (req, res) => {
     const { productId } = req.body;
+    const userId = req.user.id; // Get the user ID from the token
 
     try {
-        let wishlist = await Wishlist.findOne();
+        let wishlist = await Wishlist.findOne({ userId });
         if (!wishlist) {
-            wishlist = new Wishlist({ products: [productId] });
+            wishlist = new Wishlist({ userId, products: [productId] });
         } else if (!wishlist.products.includes(productId)) {
             wishlist.products.push(productId);
         }
@@ -34,15 +36,17 @@ router.post('/add', async (req, res) => {
     }
 });
 
-// Remove product from wishlist
-router.delete('/remove/:productId', async (req, res) => {
+// Remove product from wishlist for the authenticated user
+router.delete('/remove/:productId', authMiddleware, async (req, res) => {
     const { productId } = req.params;
+    const userId = req.user.id; // Get the user ID from the token
+
     try {
-        const wishlist = await Wishlist.findOne();
+        const wishlist = await Wishlist.findOne({ userId });
         if (!wishlist) {
             return res.status(404).json({ message: 'Wishlist not found' });
         }
-        wishlist.products = wishlist.products.filter(item => item._id.toString() !== productId);
+        wishlist.products = wishlist.products.filter(item => item.toString() !== productId);
         await wishlist.save();
         res.status(200).json({ message: 'Product removed from wishlist', wishlist });
     } catch (error) {
@@ -50,17 +54,17 @@ router.delete('/remove/:productId', async (req, res) => {
     }
 });
 
-// Check if a product is in the wishlist
-router.get('/check', async (req, res) => {
+// Check if a product is in the wishlist for the authenticated user
+router.get('/check', authMiddleware, async (req, res) => {
     const { productId } = req.query;
+    const userId = req.user.id; // Get the user ID from the token
 
     try {
-        const wishlist = await Wishlist.find();
+        const wishlist = await Wishlist.findOne({ userId });
         if (!wishlist) {
             return res.status(404).json({ message: 'Wishlist not found' });
         }
 
-        // Check if the productId exists in the wishlist's products array
         const isInWishlist = wishlist.products.includes(productId);
         res.status(200).json({ inWishlist: isInWishlist });
     } catch (error) {

@@ -1,8 +1,14 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Button } from "@mui/material";
+import { Link, useNavigate } from "react-router-dom";
 import "./Navbar.css";
 
 const Navbar = () => {
+  const navigate = useNavigate();
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate("/");
+  }
   return (
     <nav className="navbar">
       <div className="navbar-left">
@@ -18,6 +24,12 @@ const Navbar = () => {
           </li>
           <li>
             <Link to="/wishlist">Wishlist</Link>
+          </li>
+          <li>
+            <Link to="/profile">Profile</Link>
+          </li>
+          <li>
+            <Button onClick={handleLogout}>Logout</Button>
           </li>
         </ul>
       </div>

@@ -8,6 +8,7 @@ const cors = require('cors');
 const productRoutes = require('./routes/productRoutes');
 const wishlistRoutes = require('./routes/wishlistRoutes');
 const cartRoutes = require('./routes/cartRoutes');
+const authRoutes = require('./routes/authRoutes');
 
 const app = express();
 app.use(cors());
@@ -36,6 +37,7 @@ app.use(express.static(path.join(__dirname, 'public', 'build'), {
 app.use('/api/products', productRoutes);
 app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/cart', cartRoutes);
+app.use('/api/auth', authRoutes);
 
 // Define a catch-all route to serve the React app for any other request
 app.get("*", (req, res) => {
