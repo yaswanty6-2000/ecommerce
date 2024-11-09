@@ -7,24 +7,52 @@ const Signup: React.FC = () => {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [errors, setErrors] = useState<{ name?: string; email?: string; password?: string }>({});
     const { signup } = useHttpClient();
     const navigate = useNavigate();
 
+    // Regex for password and email validation
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    const emailRegex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
+
+    const validateForm = () => {
+        const newErrors: { name?: string; email?: string; password?: string } = {};
+        
+        // Validate Name
+        if (!name) newErrors.name = 'Name is required';
+        
+        // Validate Email
+        if (!email) {
+            newErrors.email = 'Email is required';
+        } else if (!emailRegex.test(email)) {
+            newErrors.email = 'Invalid email format';
+        }
+
+        // Validate Password
+        if (!password) {
+            newErrors.password = 'Password is required';
+        } else if (!passwordRegex.test(password)) {
+            newErrors.password =
+                'Password must be at least 8 characters long and contain an uppercase letter, a lowercase letter, a number, and a special character';
+        }
+        
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        const body = {
-            name: name,
-            email: email,
-            password: password
-        };
+        if (!validateForm()) return;
+
+        const body = { name, email, password };
         signup(body)
-            .then(res => {
+            .then((res) => {
                 alert('User created successfully');
-                navigate("/login");
+                navigate('/login');
             })
-            .catch(err => {
+            .catch((err) => {
                 alert(err?.error);
-            })
+            });
     };
 
     return (
@@ -48,6 +76,8 @@ const Signup: React.FC = () => {
                     margin="normal"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
+                    error={!!errors.name}
+                    helperText={errors.name}
                     InputLabelProps={{
                         style: { color: 'white' }
                     }}
@@ -63,6 +93,8 @@ const Signup: React.FC = () => {
                     margin="normal"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    error={!!errors.email}
+                    helperText={errors.email}
                     InputLabelProps={{
                         style: { color: 'white' }
                     }}
@@ -79,6 +111,8 @@ const Signup: React.FC = () => {
                     margin="normal"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    error={!!errors.password}
+                    helperText={errors.password}
                     InputLabelProps={{
                         style: { color: 'white' }
                     }}

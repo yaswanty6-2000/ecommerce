@@ -15,6 +15,9 @@ export const useHttpClient = () => {
         signup: (body: any) => {
             return httpClient.post(`${BASE_URLS.EXPRESS_URL}/api/auth/signup`, body)
         },
+        updateProfile: (body: any) => {
+            return httpClient.put(`${BASE_URLS.EXPRESS_URL}/api/auth/profile`, body, options)
+        },
         fetchProducts: () => {
             return httpClient.get(`${BASE_URLS.EXPRESS_URL}/api/products`, options)
         },

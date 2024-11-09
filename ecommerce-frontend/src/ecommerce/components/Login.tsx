@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
 import { Box, Button, TextField, Typography, Link } from '@mui/material';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
 import { useHttpClient } from '../hooks/useHttpClient';
+import { useUser } from '../context/UserContext';
 
 const Login: React.FC = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const { login } = useHttpClient();
     const navigate = useNavigate();
+    const { setUser } = useUser();
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -20,6 +23,8 @@ const Login: React.FC = () => {
                 const token = res.data?.token;
                 if (token) {
                     localStorage.setItem("auth_token", token);
+                    const decodedToken: { name: string; email: string } = jwtDecode(token);
+                    setUser(decodedToken.name, decodedToken.email);
                     navigate("/products");
                 }
             })

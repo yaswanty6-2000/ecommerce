@@ -1,42 +1,54 @@
 import React, { useState } from 'react';
-import { Box, Button, Card, CardContent, IconButton, TextField, Typography } from '@mui/material';
+import { Box, Button, Card, CardContent, IconButton, TextField, Typography, Avatar } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Cancel';
-
-interface UserProfile {
-    name: string;
-    email: string;
-}
+import { useUser } from '../context/UserContext';
+import { useHttpClient } from '../hooks/useHttpClient';
+import Navbar from './Navbar';
 
 const Profile: React.FC = () => {
-    const [user, setUser] = useState<UserProfile>({
-        name: 'John Doe', // Replace with fetched data in a real scenario
-        email: 'johndoe@example.com' // Replace with fetched data in a real scenario
-    });
     const [isEditing, setIsEditing] = useState(false);
-    const [editedUser, setEditedUser] = useState<UserProfile>(user);
+    const { username, email, setUser } = useUser();
+    const { updateProfile } = useHttpClient();
+
+    const [editedUser, setEditedUser] = useState({ name: username, email: email });
 
     const handleEditToggle = () => {
         setIsEditing(!isEditing);
-        setEditedUser(user);
+        setEditedUser({ name: username, email: email });
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
-        setEditedUser({ ...editedUser, [name]: value });
+        setEditedUser((prev) => ({ ...prev, [name]: value }));
     };
 
     const handleSave = () => {
-        setUser(editedUser);
-        
-        setIsEditing(false);
+        updateProfile(editedUser)
+            .then(res => {
+                alert('Profile updated successfully');
+                setUser(editedUser.name, editedUser.email);
+                setIsEditing(false);
+            })
+            .catch(err => {
+                alert('Error updating profile');
+            });
     };
 
     return (
+        <>
+            <Navbar />
         <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh" bgcolor="#f4f6f8">
             <Card sx={{ maxWidth: 400, width: '100%', bgcolor: '#333', color: 'white', p: 2 }}>
                 <CardContent>
+                        <Box display="flex" justifyContent="center" mb={3}>
+                            <Avatar
+                                src="/path/to/profile-logo.jpg"
+                                alt="Profile Logo"
+                                sx={{ width: 100, height: 100 }}
+                            />
+                        </Box>
                     <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
                         <Typography variant="h5">User Profile</Typography>
                         <IconButton
@@ -53,7 +65,7 @@ const Profile: React.FC = () => {
                             name="name"
                             fullWidth
                             variant="outlined"
-                            value={isEditing ? editedUser.name : user.name}
+                                value={isEditing ? editedUser.name : username}
                             onChange={handleChange}
                             disabled={!isEditing}
                             InputLabelProps={{ style: { color: 'white' } }}
@@ -67,7 +79,7 @@ const Profile: React.FC = () => {
                             name="email"
                             fullWidth
                             variant="outlined"
-                            value={isEditing ? editedUser.email : user.email}
+                                value={isEditing ? editedUser.email : email}
                             onChange={handleChange}
                             disabled={!isEditing}
                             InputLabelProps={{ style: { color: 'white' } }}
@@ -92,6 +104,7 @@ const Profile: React.FC = () => {
                 </CardContent>
             </Card>
         </Box>
+        </>
     );
 };
 
