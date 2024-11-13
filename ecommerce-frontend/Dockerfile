@@ -8,13 +8,10 @@ COPY ./ecommerce-frontend ./
 RUN npm run build
 
 # Step 2: Copy the build files to the backend public directory (ecommerce-backend/public)
-FROM node:18 AS prod
+FROM caddy:latest AS prod
 
-WORKDIR /app
-COPY --from=build /app/build /app/ecommerce-backend/public
+# Copy the built frontend into the public directory of the backend
+COPY --from=build /app/build /usr/share/caddy
 
-# Install Caddy to serve the frontend
-RUN apt-get update && apt-get install -y caddy
-
-# Start Caddy to serve the frontend
-CMD ["caddy", "reverse-proxy", "--to", "backend:5000", "--config", "/etc/caddy/Caddyfile"]
+# Expose the frontend (Caddy automatically serves on port 80 by default)
+EXPOSE 80
