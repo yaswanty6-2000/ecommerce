@@ -1,13 +1,21 @@
-# Step 1: Install backend dependencies
-FROM node:18
+# Use Node.js alpine base image
+FROM node:18-alpine
 
+# Create app directory
 WORKDIR /app
-COPY ./ecommerce-backend/package.json ./ecommerce-backend/package-lock.json ./
-RUN npm install
-COPY ./ecommerce-backend ./
 
-# Step 2: Expose the API port and connect to MongoDB
+# Install dependencies first (for better caching)
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies
+RUN npm install
+
+# Copy rest of the application code
+COPY . .
+
+# Expose the port your app runs on
 EXPOSE 5000
 
-# Start the backend server (replace this with your specific start command)
+# Command to run your app
 CMD ["npm", "start"]

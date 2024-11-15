@@ -3,37 +3,62 @@ version: '3.8'
 services:
   frontend:
     build:
-      context: .
-      dockerfile: ecommerce-frontend/Dockerfile
-    ports:
-      - "80:80"  # HTTP port for local testing
-      - "443:443" # HTTPS Port
-    depends_on:
-      - backend
+      context: ./ecommerce-frontend
+      dockerfile: Dockerfile
+    container_name: ecommerce-frontend
     volumes:
-      - ./caddy/Caddyfile:/etc/caddy/Caddyfile
-      - caddy_data:/data
-      - caddy_config:/config
+      - frontend_build:/app/build
+    environment:
+      - REACT_APP_EXPRESS_URL=http://backend:5000
+    networks:
+      - app-network
 
   backend:
     build:
-      context: .
-      dockerfile: ecommerce-backend/Dockerfile
-    ports:
-      - "5000:5000"
+      context: ./ecommerce-backend
+      dockerfile: Dockerfile
+    container_name: ecommerce-backend
     environment:
       - MONGO_URI=mongodb://mongo:27017/ecommerce
+      - JWT_SECRET=secret
+      - JWT_EXPIRATION=1d
+      - PORT=5000
+    networks:
+      - app-network
     depends_on:
       - mongo
 
   mongo:
     image: mongo:latest
+    container_name: mongodb
     volumes:
-      - mongo_data:/data/db
-    expose:
-      - "27017"
+      - mongodb_data:/data/db
+    networks:
+      - app-network
 
+  caddy:
+    image: caddy:2-alpine
+    container_name: caddy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+      - frontend_build:/srv:ro
+    networks:
+      - app-network
+    depends_on:
+      - frontend
+      - backend
+      
 volumes:
-  mongo_data:
+  mongodb_data:
   caddy_data:
   caddy_config:
+  frontend_build:
+
+networks:
+  app-network:
+    driver: bridge
