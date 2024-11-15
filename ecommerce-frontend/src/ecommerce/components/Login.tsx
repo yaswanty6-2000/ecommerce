@@ -29,6 +29,7 @@ const Login: React.FC = () => {
                 }
             })
             .catch(err => {
+                alert('user email or password is wrong');
                 console.log('Error', e);
             })
     };
