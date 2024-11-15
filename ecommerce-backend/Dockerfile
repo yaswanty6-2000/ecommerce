@@ -5,13 +5,10 @@ FROM node:18-alpine
 WORKDIR /app
 
 # Install dependencies first (for better caching)
-# Copy package files
 COPY package*.json ./
-
-# Install dependencies
 RUN npm install
 
-# Copy rest of the application code
+# Copy the rest of the application code
 COPY . .
 
 # Expose the port your app runs on

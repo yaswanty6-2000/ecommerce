@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   frontend:
     build:
@@ -51,8 +49,7 @@ services:
       - app-network
     depends_on:
       - frontend
-      - backend
-      
+
 volumes:
   mongodb_data:
   caddy_data:
